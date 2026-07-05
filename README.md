@@ -28,7 +28,7 @@ The agent graph is served behind a **FastAPI backend** (`backend/`) and consumed
 The legacy Gradio UI (`app/main.py`) still works standalone (`python app/main.py`) and is kept for reference, but is superseded by the backend/frontend split for anything beyond local experimentation.
 
 ## Tech Stack
-LangGraph · ChromaDB · MCP · OpenAI GPT-4o · Langfuse · FastAPI · Streamlit · Docker
+LangGraph · ChromaDB · MCP · OpenAI GPT-4o mini · Langfuse · FastAPI · Streamlit · Docker
 
 ## Project Structure
 ```
@@ -125,18 +125,6 @@ Visit `http://localhost:7860`.
 ```bash
 python mcp_server/server.py
 ```
-
-## Security & Deployment Notes
-
-- **Secret isolation:** the frontend container never has `OPENAI_API_KEY`, `GMAIL_APP_PASSWORD`, or `TAVILY_API_KEY` — it only holds `BACKEND_URL` and an optional `BACKEND_API_KEY`, and talks to the backend exclusively over HTTP. Even a fully compromised frontend container exposes nothing beyond the backend's public API.
-- **CORS:** the backend only accepts browser requests from origins listed in `ALLOWED_ORIGINS` (set this to your deployed frontend's real URL in production — the default only allows localhost).
-- **Optional shared-secret auth:** set `BACKEND_API_KEY` on the backend and the matching value in `frontend/.env` to require an `X-API-Key` header on every request — useful once the backend isn't only reachable from the frontend.
-- **Rate limiting:** a per-IP fixed-window limiter (`backend/security.py`) protects `/api/*` routes (`/health` is exempt for orchestrator liveness checks). It's in-process, so it's correct for the default single-worker `uvicorn` deployment; move to a Redis-backed limiter if you scale to multiple backend workers/replicas.
-- **Input validation:** every request body is a strict Pydantic model (`backend/schemas.py`) with length limits — no raw/untyped dict payloads reach agent code.
-- **No leaked internals:** unhandled exceptions are logged server-side and returned to clients as a generic `500 Internal server error` — stack traces, file paths, and API responses from upstream services (OpenAI/Tavily) never reach the browser.
-- **Non-root containers:** both `Dockerfile.backend` and `frontend/Dockerfile` run the app as an unprivileged `appuser`, not root.
-- **Human-in-the-loop preserved:** `POST /api/letter/send` is still the only path that can send an email, and it's only ever called after the consumer has seen the drafted letter and explicitly clicked "Confirm & Send" in the frontend — nothing auto-sends server-side.
-
 ## Sample Interaction
 
 **Input:**
@@ -155,4 +143,4 @@ python mcp_server/server.py
 - **Jurisdiction scope:** Sindh only, matching the province of the source Act. Federal/other-provincial consumer protection laws are out of scope for this MVP.
 
 ## Author
-Midhat — BSAI, SZABIST Karachi
+Midhat Maryam
