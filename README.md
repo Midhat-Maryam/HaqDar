@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧾 HaqDar
+#  HaqDar
 ### AI Consumer Rights Advisor — Sindh, Pakistan
 
 *Describe your consumer complaint. HaqDar tells you your legal rights, drafts your complaint letter, and tells you exactly where to file it.*
