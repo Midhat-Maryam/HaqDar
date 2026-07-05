@@ -1,0 +1,31 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Only backend dependencies — no streamlit here, keeps this image lean and
+# means a frontend-only dependency bump never forces a backend rebuild.
+COPY requirements-backend.txt .
+RUN pip install --no-cache-dir -r requirements-backend.txt
+
+# Backend needs the agent graph, data, and RAG index — NOT frontend/.
+COPY agents/ agents/
+COPY backend/ backend/
+COPY data/ data/
+COPY rag/ rag/
+COPY mcp_server/ mcp_server/
+COPY config.py .
+
+# Pre-build the ChromaDB index at image build time so the container starts
+# ready to serve (no cold-start indexing delay).
+RUN python data/build_dataset.py && python rag/build_index.py
+
+# Run as a non-root user — no reason the process needs root inside the container.
+RUN useradd --create-home appuser && chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 8000
+
+# --proxy-headers: correct client IPs behind a reverse proxy (needed for the
+# per-IP rate limiter in backend/security.py to see the real caller, not the
+# proxy's address, when deployed behind nginx/Traefik/a cloud load balancer).
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
