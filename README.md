@@ -31,7 +31,7 @@
 
 </div>
 
-> **Note:** GitHub renders the video above automatically once `haqdar-demo.mp4` is committed under `docs/` in this repo. If it doesn't play, [download it directly](docs/haqdar-demo.mp4).
+> [download it directly](docs/haqdar-demo.mp4).
 
 ---
 
