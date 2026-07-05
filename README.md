@@ -1,19 +1,18 @@
-# HaqDar 🧾 — AI Consumer Rights Advisor
+# HaqDar (AI Consumer Rights Advisor
 
 An agentic AI system that listens to a Pakistani consumer's complaint, identifies their legal rights under the **Sindh Consumer Protection Act, 2014** (and its 2017 Rules), drafts a formal complaint letter, and routes them to the exact authority or forum to file with.
 
-Built for the Atomcamp Data Science & AI Bootcamp capstone — scoped to demonstrate genuine agentic behavior (supervisor routing, dynamic tool selection, reflection loops) rather than a linear RAG pipeline.
 
 ## Architecture
 
 ![Architecture](docs/architecture.svg)
 
 **Flow:**
-1. **Classifier** — GPT-4o classifies the complaint into one of four issue types (defective product, defective service, unfair/deceptive practice, pricing/receipt/disclosure), or flags it unclear.
+1. **Classifier** — GPT-4o mini classifies the complaint into one of four issue types (defective product, defective service, unfair/deceptive practice, pricing/receipt/disclosure), or flags it unclear.
 2. **Supervisor decision** — if classification confidence is low, the graph ends and asks a clarifying question instead of guessing (dynamic routing, not a fixed pipeline).
 3. **Legal Retrieval** — queries a ChromaDB collection of the Act's 48 sections (chunked by section, enriched with plain-language trigger phrases) for the most relevant provisions.
-4. **Letter Drafter** — GPT-4o drafts a formal complaint letter, instructed to cite *only* the retrieved section numbers.
-5. **Reflection** — a second GPT-4o call checks the draft against the actual retrieved text, catching hallucinated citations or unsupported claims. If it fails, the graph loops back to the drafter (max 1 retry).
+4. **Letter Drafter** — GPT-4o mini drafts a formal complaint letter, instructed to cite *only* the retrieved section numbers.
+5. **Reflection** — a second GPT-4o call checks the draft against the actual retrieved text, catching hallucinated citations or unsupported claims. If it fails, the graph loops back to the drafter.
 6. **Authority Router** — an MCP tool call maps the issue type to the correct forum (Consumer Court vs. the Authority) and any filing pre-requisites (e.g. the mandatory 15-day notice under s.29).
 7. **Output assembly** — final letter + cited sections + filing instructions returned to the UI.
 
